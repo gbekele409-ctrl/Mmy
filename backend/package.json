@@ -1,7 +1,7 @@
 {
   "name": "aviator-backend",
   "version": "1.0.0",
-  "description": "Backend for Aviator-style demo game website",
+  "description": "Backend for Aviator-style game website (Railway + Supabase Postgres)",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
@@ -18,7 +18,7 @@
     "express-validator": "^7.2.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.6.0",
+    "pg": "^8.12.0",
     "morgan": "^1.10.0",
     "socket.io": "^4.7.5"
   },
@@ -26,3 +26,4 @@
     "nodemon": "^3.1.4"
   }
 }
+
