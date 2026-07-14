@@ -1,62 +1,71 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { loginUser } from '../api.js';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { telegramLogin } from '../api.js';
 import { useAuth } from '../App.jsx';
 
+// This app is designed to run inside Telegram as a Mini App. On load, the
+// Telegram Web App SDK (loaded via index.html) gives us a signed
+// `initData` string containing the user's Telegram identity. We send that
+// straight to the backend, which verifies the signature and issues our
+// own JWT - the user never types a password.
 export default function Login() {
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [status, setStatus] = useState('checking');
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      const res = await loginUser({ identifier, password });
-      login(res.data.user, res.data.token);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
-    } finally {
-      setSubmitting(false);
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+
+    if (!tg || !tg.initData) {
+      setStatus('not-telegram');
+      return;
     }
-  };
+
+    tg.ready();
+    tg.expand();
+
+    telegramLogin(tg.initData)
+      .then((res) => {
+        login(res.data.user, res.data.token);
+        setStatus('success');
+        navigate('/dashboard');
+      })
+      .catch((err) => {
+        setStatus('error');
+        setErrorMsg(err.response?.data?.error || 'Could not verify your Telegram account. Please try again.');
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="container" style={{ maxWidth: 420, marginTop: '10vh' }}>
+    <div className="container" style={{ maxWidth: 420, marginTop: '15vh', textAlign: 'center' }}>
       <div className="card">
-        <h2 style={{ marginTop: 0, textAlign: 'center' }}>✈ Sign in to Aviator</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            className="input"
-            type="text"
-            placeholder="Username or email"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            autoComplete="username"
-            required
-          />
-          <input
-            className="input"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-          {error && <div className="error-text">{error}</div>}
-          <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: '100%' }}>
-            {submitting ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
-        <p style={{ textAlign: 'center', marginTop: 16, color: '#9aa0b4' }}>
-          Don't have an account? <Link to="/register">Register</Link>
-        </p>
+        <h2 style={{ marginTop: 0 }}>✈ Aviator</h2>
+
+        {status === 'checking' && <p style={{ color: '#9aa0b4' }}>Signing you in with Telegram...</p>}
+
+        {status === 'not-telegram' && (
+          <>
+            <p style={{ color: '#9aa0b4' }}>
+              This app only works inside Telegram. Please open it through your Telegram bot.
+            </p>
+            <p style={{ fontSize: 13, color: '#5b6178' }}>
+              If you're testing outside Telegram, use Telegram Desktop or the Telegram app and
+              open the Mini App from your bot's menu button.
+            </p>
+          </>
+        )}
+
+        {status === 'error' && (
+          <>
+            <div className="error-text">{errorMsg}</div>
+            <button className="btn btn-primary" onClick={() => window.location.reload()} style={{ marginTop: 12 }}>
+              Try Again
+            </button>
+          </>
+        )}
+
+        {status === 'success' && <p className="success-text">Signed in! Redirecting...</p>}
       </div>
     </div>
   );
