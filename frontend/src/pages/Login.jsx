@@ -40,7 +40,7 @@ export default function Login() {
   return (
     <div className="container" style={{ maxWidth: 420, marginTop: '15vh', textAlign: 'center' }}>
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>✈ Aviator</h2>
+        <h2 style={{ marginTop: 0 }}>Buna Games</h2>
 
         {status === 'checking' && <p style={{ color: '#9aa0b4' }}>Signing you in with Telegram...</p>}
 
