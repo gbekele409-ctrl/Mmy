@@ -6,7 +6,6 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 const api = axios.create({ baseURL: API_URL });
 
-// Attach the stored JWT to every outgoing request.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -15,8 +14,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// If the server says our token is invalid/expired, clear it so the app
-// redirects back to the login screen instead of looping on 401s.
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -37,8 +34,9 @@ export function getSocket() {
 }
 
 /* ---------------------------- Auth ---------------------------- */
-export const registerUser = (data) => api.post('/auth/register', data);
-export const loginUser = (data) => api.post('/auth/login', data);
+// Telegram Mini App auth is now the only login path - the frontend sends
+// Telegram's signed initData, the backend verifies it and issues a JWT.
+export const telegramLogin = (initData) => api.post('/auth/telegram', { initData });
 export const getMe = () => api.get('/auth/me');
 
 /* --------------------------- Wallet ---------------------------- */
@@ -50,8 +48,9 @@ export const requestWithdraw = (amount, telebirr_phone, note) =>
 export const getMyTransactions = (page = 1) => api.get(`/wallet/transactions?page=${page}`);
 
 /* ---------------------------- Game ------------------------------ */
-export const placeBet = (amount) => api.post('/game/bet', { amount });
-export const cashOut = () => api.post('/game/cashout');
+export const placeBet = (amount, slot = 1, autoCashoutAt = null) =>
+  api.post('/game/bet', { amount, slot, auto_cashout_at: autoCashoutAt });
+export const cashOut = (slot = 1) => api.post('/game/cashout', { slot });
 export const getRoundHistory = () => api.get('/game/history');
 
 /* --------------------------- Admin ------------------------------ */
