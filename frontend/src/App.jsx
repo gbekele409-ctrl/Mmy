@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Aviator from './pages/Aviator.jsx';
 import Admin from './pages/Admin.jsx';
 
 export const AuthContext = createContext(null);
@@ -62,6 +63,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/aviator"
+            element={
+              <ProtectedRoute>
+                <Aviator />
               </ProtectedRoute>
             }
           />
