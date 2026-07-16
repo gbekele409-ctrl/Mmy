@@ -1,0 +1,640 @@
+/* ============================================================
+   Global reset & base
+   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #0a0a0d;
+  color: #e8e8ea;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card {
+  background: #1a1d29;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #4f8ef7;
+  color: white;
+}
+.btn-success {
+  background: #22c55e;
+  color: white;
+}
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+.btn-outline {
+  background: transparent;
+  border: 1px solid #3a3f52;
+  color: #e8e8ea;
+}
+
+/* ============================================================
+   Form inputs
+   ============================================================ */
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #3a3f52;
+  background: #12141c;
+  color: #e8e8ea;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.input:focus {
+  outline: 2px solid #4f8ef7;
+}
+
+.error-text {
+  color: #f87171;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.success-text {
+  color: #4ade80;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   Tables
+   ============================================================ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #2a2e3e;
+  font-size: 14px;
+}
+th {
+  color: #9aa0b4;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-pending {
+  background: #4b3d1a;
+  color: #fbbf24;
+}
+.badge-approved,
+.badge-completed {
+  background: #14351f;
+  color: #4ade80;
+}
+.badge-rejected {
+  background: #3a1616;
+  color: #f87171;
+}
+
+/* ============================================================
+   Navbar (admin/dashboard chrome, not the in-game top bar)
+   ============================================================ */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #12141c;
+  border-bottom: 1px solid #2a2e3e;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.navbar .links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.navbar .brand {
+  font-weight: 800;
+  font-size: 20px;
+  color: #4f8ef7;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   Legacy multiplier/history styles
+   (superseded by the Aviator-specific block below for the live
+   game screen, but kept here in case any other page still uses
+   the generic versions of these class names.)
+   ============================================================ */
+.phase-label {
+  text-align: center;
+  font-size: 16px;
+  color: #9aa0b4;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.stat-row span:first-child {
+  color: #9aa0b4;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #2a2e3e;
+}
+.tab {
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #9aa0b4;
+  border-bottom: 2px solid transparent;
+}
+.tab.active {
+  color: #4f8ef7;
+  border-bottom-color: #4f8ef7;
+}
+
+/* ============================================================
+   AVIATOR GAME SCREEN
+   Top bar, history strip, flight stage, plane, glow, multiplier
+   ============================================================ */
+
+.aviator-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+
+.aviator-brand {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ff3b4e;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 14px rgba(255, 59, 78, 0.35);
+}
+
+.aviator-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aviator-balance {
+  font-weight: 800;
+  font-size: 15px;
+  color: #3ddc73;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #1a1a1f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9a9aa5;
+  font-size: 14px;
+  border: 1px solid #26262d;
+  cursor: pointer;
+}
+
+/* History strip sits directly under the top bar, above the flight stage. */
+.history-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 16px 10px;
+}
+
+.history-chip {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #16161b;
+}
+.history-chip.low {
+  color: #ff6b7a;
+}
+.history-chip.mid {
+  color: #b98bff;
+}
+.history-chip.high {
+  color: #3ddc73;
+}
+
+.stage-wrap {
+  padding: 0 16px;
+}
+
+.stage {
+  position: relative;
+  border-radius: 14px;
+  height: 280px;
+  background:
+    radial-gradient(120% 90% at 15% 85%, rgba(232, 40, 63, 0.14), transparent 60%),
+    linear-gradient(180deg, #121016 0%, #0a0a0d 70%);
+  overflow: hidden;
+  border: 1px solid #1c1c22;
+}
+
+.stage .rays {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 200deg at 14% 88%,
+    rgba(255, 255, 255, 0.045) 0deg 3deg,
+    transparent 3deg 12deg
+  );
+  opacity: 0.6;
+}
+
+.curve-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.flight-glow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  /* Fully red glow, no white core - a white hot-spot at the join
+     between the plane and the trail reads as a mismatched/disconnected
+     joint rather than a glow. Bright red at the center, fading to
+     transparent red at the edges keeps everything one consistent color. */
+  background: radial-gradient(circle, rgba(255, 90, 100, 0.95) 0%, rgba(232, 40, 63, 0.45) 35%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.25s;
+}
+.flight-glow.active {
+  opacity: 1;
+}
+
+.plane-wrap {
+  position: absolute;
+  z-index: 3;
+  width: 84px;
+  height: 48px;
+  /* The curve's endpoint should land on the plane's tail, not the SVG's
+     bounding-box center. The tail sits at roughly 5% across and 87% down
+     the plane's own box, so we translate/pivot by that fraction instead
+     of the usual -50%/-50% centering. */
+  transform: translate(-5%, -87%);
+  transform-origin: 5% 87%;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  opacity: 0;
+}
+
+.plane-wrap svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 4px 10px rgba(232, 40, 63, 0.55));
+}
+
+.multiplier-display {
+  position: absolute;
+  top: 34%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(40px, 12vw, 64px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  z-index: 3;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.flew-away-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ff4d5e;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   Connecting overlay - shown while Socket.IO establishes the
+   connection. Driven by a real `connected` flag, not decorative.
+   ============================================================ */
+.connecting-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(10, 10, 13, 0.92);
+  backdrop-filter: blur(2px);
+}
+
+.connecting-overlay p {
+  color: #9aa0b4;
+  font-size: 14px;
+  margin: 0;
+}
+
+.connecting-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid #26262e;
+  border-top-color: #ff3b4e;
+  animation: connecting-spin 0.8s linear infinite;
+}
+
+@keyframes connecting-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+   Bet panels (dual bet slots)
+   ============================================================ */
+.bet-panel {
+  background: #131317;
+  border: 1px solid #1e1e24;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.bet-panel-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.mode-tabs {
+  display: flex;
+  background: #0a0a0d;
+  border-radius: 9px;
+  padding: 3px;
+  flex: 1;
+}
+.mode-tab {
+  flex: 1;
+  text-align: center;
+  padding: 7px 0;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 7px;
+  color: #7a7a85;
+  cursor: pointer;
+}
+.mode-tab.active {
+  background: #26262e;
+  color: #f2f2f4;
+}
+
+.panel-remove-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #1e1e24;
+  color: #9a9aa5;
+  border: none;
+  font-size: 16px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.auto-row {
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #9a9aa5;
+  margin-bottom: 10px;
+}
+.auto-row input[type='number'] {
+  width: 70px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  border: 1px solid #26262d;
+  background: #0a0a0d;
+  color: #f2f2f4;
+  font-size: 13px;
+  text-align: right;
+}
+.auto-label {
+  margin-right: 8px;
+}
+
+.bet-amount-block {
+  margin-bottom: 10px;
+}
+
+.stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stepper-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #1e1e24;
+  color: #f2f2f4;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+}
+.stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.stepper-input {
+  flex: 1;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 800;
+  background: transparent;
+  border: none;
+  color: #f2f2f4;
+  min-width: 0;
+}
+
+.quick-amount-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.quick-amount-btn {
+  padding: 7px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b7b7c2;
+  background: #1a1a20;
+  border-radius: 7px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+}
+.quick-amount-btn.selected {
+  background: #26262e;
+  color: #ffffff;
+}
+.quick-amount-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bet-action-block {
+  margin-bottom: 4px;
+}
+
+.bet-btn {
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.bet-btn:disabled {
+  cursor: not-allowed;
+}
+
+.bet-btn-top {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.85;
+}
+.bet-btn-sub {
+  font-size: 17px;
+  font-weight: 800;
+}
+.cur-tag {
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+.bet-btn.state-idle {
+  background: linear-gradient(180deg, #4eea82, #22c55e);
+  color: #06210f;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.28);
+}
+.bet-btn.state-placed {
+  background: #26262e;
+  color: #f2f2f4;
+}
+.bet-btn.state-cashout {
+  background: linear-gradient(180deg, #ffcf4d, #ffb930);
+  color: #2b1900;
+  box-shadow: 0 6px 16px rgba(255, 185, 48, 0.3);
+}
+.bet-btn.state-won {
+  background: #14351f;
+  color: #4ade80;
+}
+.bet-btn.state-lost {
+  background: #3a1616;
+  color: #f87171;
+}
