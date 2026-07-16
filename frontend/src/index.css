@@ -638,3 +638,76 @@ th {
   background: #3a1616;
   color: #f87171;
 }
+/* ==================================================================
+   Layout fix for the Aviator game card - append to index.css, or
+   replace the equivalent rules if you're regenerating the whole file.
+   ================================================================== */
+
+.aviator-card {
+  position: relative;
+  padding: 0;
+  /* No overflow:hidden here - that was the likely cause of the second
+     bet panel appearing clipped/missing on narrow screens. The
+     connecting-overlay still displays correctly since it's already
+     position:absolute + inset:0, which doesn't need parent clipping
+     to stay contained. */
+}
+
+.aviator-body {
+  padding: 0 16px 16px;
+}
+
+.seed-hash-note {
+  font-size: 12px;
+  color: #5b6178;
+  text-align: center;
+  word-break: break-all;
+  margin-top: 8px;
+}
+
+/* Two bet panels side by side by default. minmax(0, 1fr) - not just 1fr -
+   is the actual fix: plain `1fr` columns can still grow to fit their
+   content's intrinsic width (the quick-amount button row, in this case),
+   which is exactly what pushed the second panel off-screen. minmax(0, 1fr)
+   forces each column to respect the grid's available width instead of
+   its content's natural width. */
+.bet-panels-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* Below ~360px wide, even minmax(0,1fr) columns get too cramped for the
+   4-across quick-amount row to read comfortably - stack the two panels
+   vertically instead of forcing them to squeeze side by side. */
+@media (max-width: 360px) {
+  .bet-panels-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Also make sure the quick-amount grid itself never overflows its own
+   panel, regardless of how many buttons are in a row. */
+.quick-amount-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+.quick-amount-btn {
+  min-width: 0;
+  padding: 7px 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b7b7c2;
+  background: #1a1a20;
+  border-radius: 7px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+   }
+   
