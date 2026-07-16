@@ -1,4 +1,4 @@
-/* ============================================================
+Ii/* ============================================================
    Global reset & base
    ============================================================ */
 * {
@@ -710,4 +710,141 @@ th {
   text-overflow: ellipsis;
   white-space: nowrap;
    }
-   
+   /* ==================================================================
+   Compact bet-panel sizing - replaces the equivalent rules in index.css
+   (bet-panel, stepper, quick-amount, bet-btn) with tighter dimensions.
+   ================================================================== */
+
+.bet-panel {
+  background: #131317;
+  border: 1px solid #1e1e24;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.bet-panel-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mode-tabs {
+  display: flex;
+  background: #0a0a0d;
+  border-radius: 8px;
+  padding: 2px;
+  flex: 1;
+}
+.mode-tab {
+  flex: 1;
+  text-align: center;
+  padding: 5px 0;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  color: #7a7a85;
+  cursor: pointer;
+}
+.mode-tab.active {
+  background: #26262e;
+  color: #f2f2f4;
+}
+
+.stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.stepper-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #1e1e24;
+  color: #f2f2f4;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+}
+.stepper-input {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  background: transparent;
+  border: none;
+  color: #f2f2f4;
+  min-width: 0;
+}
+
+.quick-amount-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+.quick-amount-btn {
+  min-width: 0;
+  padding: 5px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b7b7c2;
+  background: #1a1a20;
+  border-radius: 6px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quick-amount-btn.selected {
+  background: #26262e;
+  color: #ffffff;
+}
+
+.bet-btn {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.bet-btn-top {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.85;
+}
+.bet-btn-sub {
+  font-size: 15px;
+  font-weight: 800;
+}
+.cur-tag {
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 3px;
+  opacity: 0.8;
+}
+
+.auto-row {
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.auto-row input[type='number'] {
+  width: 58px;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
