@@ -106,7 +106,7 @@ export default function Wallet() {
       {tab === 'deposit' && (
         <p style={{ fontSize: 13, color: '#9aa0b4', marginTop: 8 }}>
           <li>operator telebirr: 0992000962</li>
-              li>operator telebirr name: Gutu</li>
+             <li>operator telebirr name: Gutu</li>
           Send payment via Telebirr to the operator's Telebirr account first, then submit the
           amount and the Telebirr transaction reference below for admin verification.
         </p>
