@@ -77,7 +77,7 @@ export default function Deposit() {
         <div className="transaction-card">
           <div className="card-header">
             <h2>Add Funds to Your Account</h2>
-            <p>operator tele: 0908559033<b> gutu</b> </p>
+            <p>please wait</p>
           </div>
 
           <form onSubmit={handleSubmit} className="transaction-form">
@@ -131,6 +131,8 @@ export default function Deposit() {
           <div className="info-box">
             <h3>How to Deposit</h3>
             <ol>
+              <li>operator telebirr: 0992000962</li>
+              li>operator telebirr name: Gutu</li>
               <li>Send payment to the operator's Telebirr account</li>
               <li>Copy the transaction reference from your Telebirr receipt</li>
               <li>Paste it in the form above</li>
