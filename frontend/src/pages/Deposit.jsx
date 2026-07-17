@@ -77,7 +77,7 @@ export default function Deposit() {
         <div className="transaction-card">
           <div className="card-header">
             <h2>Add Funds to Your Account</h2>
-            <p>Send payment via Telebirr to the operator's account first, then complete the form below.</p>
+            <p>operator tele: 0908559033<b> gutu</b> </p>
           </div>
 
           <form onSubmit={handleSubmit} className="transaction-form">
