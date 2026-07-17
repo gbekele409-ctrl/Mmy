@@ -983,3 +983,68 @@ th {
     transform: scale(1);
   }
 }
+/* ==================================================================
+   Operator payment account rows (Telebirr/CBE Birr) shown on the
+   deposit tab - append to frontend/src/index.css
+   ================================================================== */
+
+.operator-accounts-block {
+  background: #12141c;
+  border: 1px solid #2a2e3e;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.operator-accounts-title {
+  font-size: 13px;
+  color: #9aa0b4;
+  margin: 0 0 10px;
+}
+
+.operator-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #22263380;
+}
+.operator-account-row:last-child {
+  border-bottom: none;
+}
+
+.operator-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.operator-account-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4f8ef7;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.operator-account-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f2f2f4;
+  letter-spacing: 0.3px;
+}
+
+.operator-account-name {
+  font-size: 12px;
+  color: #7a7a85;
+}
+
+.operator-copy-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  font-size: 13px;
+  min-width: 74px;
+  text-align: center;
+}
