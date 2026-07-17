@@ -958,3 +958,28 @@ th {
   padding-bottom: max(16px, env(safe-area-inset-bottom));
    }
    
+/* ==================================================================
+   Smooth balance update transition - append to frontend/src/index.css
+   Prevents the "glitch" of an abrupt re-render when the balance changes;
+   briefly scales/fades the number instead of an instant hard swap.
+   ================================================================== */
+
+.balance-pulse {
+  display: inline-block;
+  animation: balance-pulse-anim 0.35s ease;
+}
+
+@keyframes balance-pulse-anim {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
