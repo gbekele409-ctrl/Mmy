@@ -13,7 +13,7 @@ export default function Support() {
         </p>
         <a
           className="btn btn-primary"
-          href="https://t.me/your_support_username"
+          href="https://t.me/Helen23mjd"
           target="_blank"
           rel="noopener noreferrer"
           style={{ display: 'inline-block', textDecoration: 'none', marginTop: 10 }}
