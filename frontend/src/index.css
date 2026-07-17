@@ -891,4 +891,70 @@ th {
   font-size: 11px;
   font-weight: 600;
 }
+/* ==================================================================
+   Bottom navigation - glass/frosted style
+   Replaces the earlier solid-background .bottom-nav rules in index.css
+   ================================================================== */
 
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 10px max(8px, env(safe-area-inset-bottom));
+
+  /* Glass effect: translucent dark background + blur, so whatever content
+     scrolls behind the nav is softly visible through it. */
+  background: rgba(18, 20, 28, 0.6);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  color: #7a7a85;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background 0.15s ease;
+}
+
+.bottom-nav-item:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.bottom-nav-item.active {
+  color: #ff3b4e;
+}
+
+.bottom-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+}
+
+.bottom-nav-label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Give scrollable page content room so it doesn't sit underneath the
+   fixed, translucent nav bar - pages already add paddingBottom: 90 inline,
+   this is a fallback/global safety net for any that don't. */
+.container {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+   }
+   
