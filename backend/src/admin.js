@@ -326,5 +326,137 @@ router.post(
     }
   }
 );
+// ============================================================================
+// ADDITIONS to backend/src/admin.js (append before module.exports)
+// ============================================================================
 
+const { body: bodyValidator } = require('express-validator');
+
+// PUT /api/admin/settings/game-logo
+// Admin sets the URL of an already-hosted image (e.g. uploaded to any
+// static host / Supabase Storage / Cloudinary) to use as the Aviator game
+// logo shown to players. This does NOT handle file upload itself - it
+// just stores a URL string. If you want direct image upload from the
+// admin panel, that needs a file storage service wired in separately
+// (Supabase Storage is the natural fit here since you're already on
+// Supabase) - flag if you want that built next.
+router.put(
+  '/settings/game-logo',
+  [bodyValidator('url').isURL().withMessage('A valid image URL is required')],
+  handleValidation,
+  async (req, res, next) => {
+    try {
+      await query(
+        `INSERT INTO platform_settings (key, value, updated_at)
+         VALUES ('game_logo_url', $1, now())
+         ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = now()`,
+        [req.body.url]
+      );
+
+      logger.info('Admin updated game logo', { admin: req.user.username, url: req.body.url });
+
+      res.json({ message: 'Game logo updated', url: req.body.url });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+// ============================================================================
+// ADDITIONS to backend/src/admin.js
+//
+// Add these route handlers to your existing admin.js file (which already
+// has requireAuth + requireAdmin applied via `router.use(...)` at the top,
+// and already has the approve/reject transaction routes). Everything
+// below is NEW - append it before the final `module.exports = router;`
+// line, keeping the existing routes as they are.
+// ============================================================================
+
+// GET /api/admin/stats/overview
+// Real aggregate numbers for the admin dashboard: total registered users,
+// total deposited (approved deposits only), total withdrawn (approved
+// withdrawals only), total amount users have won (sum of all 'payout'
+// transactions), and total platform result (net of all bets minus all
+// payouts - positive means the house is ahead, negative means users are
+// net winners overall).
+router.get('/stats/overview', async (req, res, next) => {
+  try {
+    const [usersRes, depositsRes, withdrawalsRes, betsRes, payoutsRes] = await Promise.all([
+      query('SELECT COUNT(*)::int AS count FROM users'),
+      query(`SELECT COALESCE(SUM(amount), 0)::bigint AS total FROM transactions WHERE type = 'deposit' AND status = 'approved'`),
+      query(`SELECT COALESCE(SUM(amount), 0)::bigint AS total FROM transactions WHERE type = 'withdraw' AND status = 'approved'`),
+      query(`SELECT COALESCE(SUM(amount), 0)::bigint AS total FROM transactions WHERE type = 'bet' AND status = 'completed'`),
+      query(`SELECT COALESCE(SUM(amount), 0)::bigint AS total FROM transactions WHERE type = 'payout' AND status = 'completed'`),
+    ]);
+
+    const totalBets = betsRes.rows[0].total;
+    const totalPayouts = payoutsRes.rows[0].total;
+
+    res.json({
+      totalUsers: usersRes.rows[0].count,
+      totalDeposited: Number(depositsRes.rows[0].total) / 100,
+      totalWithdrawn: Number(withdrawalsRes.rows[0].total) / 100,
+      totalUserWinnings: Number(totalPayouts) / 100,
+      // Platform result: what players wagered minus what they were paid
+      // out. Positive = house is net ahead for the period; negative =
+      // players are net ahead (can happen after a lucky streak of big
+      // multipliers - a real, expected part of variance, not a bug).
+      platformResult: (Number(totalBets) - Number(totalPayouts)) / 100,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/admin/stats/users
+// Per-user list with registration info and their own total winnings
+// (sum of their 'payout' transactions), for the "total user, name of
+// them, win of the user" admin view.
+router.get('/stats/users', async (req, res, next) => {
+  try {
+    const page = Math.max(parseInt(req.query.page || '1', 10), 1);
+    const limit = Math.min(parseInt(req.query.limit || '25', 10), 100);
+    const offset = (page - 1) * limit;
+
+    const { rows } = await query(
+      `SELECT
+         u.id,
+         u.username,
+         u.telegram_first_name,
+         u.balance,
+         u.is_active,
+         u.created_at,
+         COALESCE(w.total_won, 0) AS total_won
+       FROM users u
+       LEFT JOIN (
+         SELECT user_id, SUM(amount) AS total_won
+         FROM transactions
+         WHERE type = 'payout' AND status = 'completed'
+         GROUP BY user_id
+       ) w ON w.user_id = u.id
+       ORDER BY u.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+
+    const { rows: countRows } = await query('SELECT COUNT(*)::int AS count FROM users');
+
+    res.json({
+      users: rows.map((u) => ({
+        id: u.id,
+        username: u.username,
+        telegram_first_name: u.telegram_first_name,
+        balance: u.balance / 100,
+        totalWon: Number(u.total_won) / 100,
+        isActive: u.is_active,
+        created_at: u.created_at,
+      })),
+      page,
+      totalPages: Math.ceil(countRows[0].count / limit),
+      total: countRows[0].count,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+      
 module.exports = router;
