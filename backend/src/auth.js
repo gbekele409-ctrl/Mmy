@@ -238,5 +238,70 @@ router.get('/me', requireAuth, async (req, res) => {
     },
   });
 });
+// ============================================================================
+// ADDITION to backend/src/auth.js
+//
+// Insert this block inside the `if (!user) { ... }` section of the
+// POST /api/auth/telegram route - specifically right after the new user's
+// row is inserted (after `user = insertRes.rows[0];`), and BEFORE the
+// pending-phone-number attachment logic that already lives there.
+//
+// This credits a one-time signup bonus in cents, recorded as a real
+// transaction (so it shows up in the user's transaction history, not just
+// a silent balance bump), and sets signup_bonus_granted = true so it can
+// never fire twice for the same account even under retry/race conditions.
+// ============================================================================
+
+// Grant the one-time signup bonus. Reads the configurable amount from
+// platform_settings (falls back to 10 birr if not set), credits the
+// user's balance, records a transaction for transparency, and marks the
+// flag so this can never run again for this account.
+try {
+  const { rows: settingRows } = await query(
+    `SELECT value FROM platform_settings WHERE key = 'signup_bonus_birr'`
+  );
+  const bonusBirr = parseFloat(settingRows[0]?.value || '10');
+  const bonusCents = Math.round(bonusBirr * 100);
+
+  if (bonusCents > 0) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Re-check the flag under a row lock immediately before crediting -
+      // this is what actually prevents a double-grant even if this code
+      // somehow ran twice concurrently for the same brand-new user.
+      const { rows: lockedUserRows } = await client.query(
+        'SELECT signup_bonus_granted FROM users WHERE id = $1 FOR UPDATE',
+        [user.id]
+      );
+      const alreadyGranted = lockedUserRows[0]?.signup_bonus_granted;
+
+      if (!alreadyGranted) {
+        await client.query(
+          'UPDATE users SET balance = balance + $1, signup_bonus_granted = TRUE WHERE id = $2',
+          [bonusCents, user.id]
+        );
+        await client.query(
+          `INSERT INTO transactions (user_id, type, amount, status, note)
+           VALUES ($1, 'payout', $2, 'completed', 'Registration bonus')`,
+          [user.id, bonusCents]
+        );
+        user.balance = (user.balance || 0) + bonusCents;
+      }
+
+      await client.query('COMMIT');
+    } catch (bonusErr) {
+      await client.query('ROLLBACK');
+      // Don't fail the whole login over a bonus-crediting error - log it
+      // and let the user in with whatever balance they already have.
+      console.error('[auth] Failed to grant signup bonus', { userId: user.id, error: bonusErr.message });
+    } finally {
+      client.release();
+    }
+  }
+} catch (err) {
+  console.error('[auth] Signup bonus lookup failed', { error: err.message });
+}
 
 module.exports = { router, requireAuth, requireAdmin, signToken, verifyToken };
