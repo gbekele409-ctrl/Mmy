@@ -65,5 +65,14 @@ export const getAllTransactions = (page = 1, filters = {}) => {
 export const approveTransaction = (id, telebirr_reference) =>
   api.post(`/admin/transactions/${id}/approve`, { telebirr_reference });
 export const rejectTransaction = (id, reason) => api.post(`/admin/transactions/${id}/reject`, { reason });
+/* ============================================================
+   ADDITIONS to frontend/src/api.js
+   Add these exports alongside the existing admin functions.
+   ============================================================ */
+
+export const getStatsOverview = () => api.get('/admin/stats/overview');
+export const getStatsUsers = (page = 1) => api.get(`/admin/stats/users?page=${page}`);
+export const setGameLogo = (url) => api.put('/admin/settings/game-logo', { url });
+export const getGameLogo = () => api.get('/settings/game-logo');
 
 export default api;
