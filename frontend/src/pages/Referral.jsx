@@ -30,7 +30,7 @@ export default function Referral() {
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Invite Friends</h2>
         <p style={{ color: '#9aa0b4', fontSize: 14 }}>
-          Share your link. When a friend you invite makes their first deposit, you earn a 5%
+          Share your link. When a friend you invite makes their first deposit, you earn a 50%
           commission automatically.
         </p>
 
