@@ -1,4 +1,4 @@
-coconst TelegramBot = require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api');
 const { query } = require('./database');
 const logger = require('./logger');
 
