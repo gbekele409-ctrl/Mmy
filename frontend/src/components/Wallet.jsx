@@ -25,25 +25,11 @@ const PAYMENT_METHODS = [
 // per payment method.
 const AGENTS = [
   {
-    id: 'ahemed',
-    name: 'Ahemed',
-    accounts: { telebirr: '0969224890', cbebirr: '0969224890' },
+    id: 'Gutu',
+    name: 'Gutu',
+    accounts: { telebirr: '0992000962', cbebirr: '0992000962' },
   },
-  {
-    id: 'abajahde',
-    name: 'Abajahde',
-    accounts: { telebirr: '0911223344', cbebirr: '0911223344' },
-  },
-  {
-    id: 'merkin',
-    name: 'Merkin',
-    accounts: { telebirr: '0922334455', cbebirr: '0922334455' },
-  },
-  {
-    id: 'semagn',
-    name: 'Semagn',
-    accounts: { telebirr: '0933445566', cbebirr: '0933445566' },
-  },
+
 ];
 
 const DEPOSIT_WINDOW_SECONDS = 15 * 60;
