@@ -13,7 +13,7 @@ const HOW_IT_WORKS = [
   },
   {
     title: 'You earn commission',
-    body: 'You automatically receive a commission on their first deposit, credited straight to your balance.',
+    body: 'You automatically receive a commission 50% on their first deposit, credited straight to your balance.',
   },
 ];
 
