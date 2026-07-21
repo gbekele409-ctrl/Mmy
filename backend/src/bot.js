@@ -1,4 +1,4 @@
-const TelegramBot = require('node-telegram-bot-api');
+coconst TelegramBot = require('node-telegram-bot-api');
 const { query } = require('./database');
 const logger = require('./logger');
 
@@ -30,9 +30,21 @@ function startBot() {
 
   const bot = new TelegramBot(token, { polling: true });
 
-  bot.onText(/\/start/, (msg) => {
+  bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
+    const telegramId = msg.from.id;
     const firstName = msg.from.first_name || 'there';
+
+    // Save/refresh the chat id immediately on /start, for any user who
+    // already has an account. This means broadcasts can still reach them
+    // even if they never complete (or re-complete) the contact-share step
+    // below - e.g. after a phone change, or a user who created their
+    // account without going through /start originally.
+    try {
+      await query('UPDATE users SET telegram_chat_id = $1 WHERE telegram_id = $2', [chatId, telegramId]);
+    } catch (err) {
+      logger.error('[bot] Failed to save chat id on /start', { error: err.message, telegramId });
+    }
 
     bot.sendMessage(
       chatId,
@@ -74,15 +86,18 @@ function startBot() {
       const { rows } = await query('SELECT id FROM users WHERE telegram_id = $1', [telegramId]);
 
       if (rows.length > 0) {
-        await query('UPDATE users SET telegram_phone = $1 WHERE telegram_id = $2', [normalizedPhone, telegramId]);
-      } else {
-        // No account yet - stage the phone number keyed by telegram_id so
-        // auth.js can pick it up when they open the Mini App for the
-        // first time and their account gets created.
         await query(
-          `INSERT INTO pending_telegram_phones (telegram_id, phone) VALUES ($1, $2)
-           ON CONFLICT (telegram_id) DO UPDATE SET phone = $2`,
-          [telegramId, normalizedPhone]
+          'UPDATE users SET telegram_phone = $1, telegram_chat_id = $2 WHERE telegram_id = $3',
+          [normalizedPhone, chatId, telegramId]
+        );
+      } else {
+        // No account yet - stage the phone number AND chat id keyed by
+        // telegram_id so auth.js can pick both up when they open the Mini
+        // App for the first time and their account gets created.
+        await query(
+          `INSERT INTO pending_telegram_phones (telegram_id, phone, chat_id) VALUES ($1, $2, $3)
+           ON CONFLICT (telegram_id) DO UPDATE SET phone = $2, chat_id = $3`,
+          [telegramId, normalizedPhone, chatId]
         );
       }
 
