@@ -18,6 +18,8 @@ const { router: authRouter } = require('./auth');
 const walletRouter = require('./wallet');
 const { router: gameRouter, attachSocket } = require('./game');
 const adminRouter = require('./admin');
+const referralRouter = require('./referral');
+const couponsRouter = require('./coupons');
 
 const app = express();
 
@@ -57,6 +59,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/wallet', walletRouter);
 app.use('/api/game', gameRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/referral', referralRouter);
+app.use('/api/coupons', couponsRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
