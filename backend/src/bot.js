@@ -125,6 +125,12 @@ function startBot() {
         launchUrl = `${launchUrl}${separator}ref=${encodeURIComponent(referralCode)}`;
       }
 
+      // TEMPORARY DEBUG LOG - remove once referral tracking is confirmed
+      // working. Shows exactly what this chat's captured referral code
+      // was (if any) and the final Mini App URL sent, without touching
+      // the database or requiring a live test account.
+      logger.info('[bot] Sending Mini App button', { chatId, referralCode, launchUrl });
+
       bot.sendMessage(chatId, 'Tap below to start playing:', {
         reply_markup: {
           inline_keyboard: [
