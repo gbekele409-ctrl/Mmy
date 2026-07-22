@@ -15,7 +15,7 @@ function formatHMS(totalSeconds) {
 }
 
 const REASON_MESSAGES = {
-  not_eligible_withdrawn: 'Cashback is not available on accounts that have made a withdrawal.',
+  not_eligible_withdrawn: 'make deposit get 20% Cashback.',
   balance_not_zero: "Cashback unlocks once today's balance has been fully lost.",
   no_deposit_today: 'Make a deposit today to become eligible for cashback.',
   cooldown: null, // shown via the countdown instead
