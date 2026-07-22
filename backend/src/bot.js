@@ -7,7 +7,18 @@ const logger = require('./logger');
 // Flow: /start -> bot asks the user to share their phone number via
 // Telegram's native contact button -> once shared, we save it against
 // their user record (or stage it if they don't have an account yet) and
-// show the "Play Aviator" button that opens the Mini App.
+// show the "Play Buna Games" button that opens the Mini App.
+//
+// Referral codes: a link like t.me/your_bot?start=REF_abc123 delivers
+// "REF_abc123" as text AFTER "/start " in msg.text - NOT via Telegram's
+// start_param mechanism, because that mechanism only works for Direct
+// Link and Attachment Menu launches, not for the inline `web_app`-type
+// button this bot uses to open the Mini App (Telegram Bot API
+// limitation - inline web_app buttons only pass basic user info and a
+// query_id, never a start parameter). So the code is captured here from
+// the raw /start command, held in memory across the phone-share step,
+// then appended as an ordinary `?ref=` query parameter on the Mini App
+// button's URL - which Login.jsx reads from window.location.search.
 //
 // botInstance holds the running bot object once started, so other parts
 // of the backend (admin.js's broadcast route) can reuse the SAME live
@@ -15,6 +26,13 @@ const logger = require('./logger');
 // connection or running into a circular import between bot.js and
 // admin.js.
 let botInstance = null;
+
+// Referral codes captured from /start, keyed by telegram chat id, held
+// only long enough to survive the phone-share step (a minute or two in
+// practice). Not persisted to the database directly - auth.js is what
+// actually links referred_by, using the code once it reaches it via the
+// Mini App URL.
+const pendingReferralCodes = new Map();
 
 function startBot() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -30,32 +48,25 @@ function startBot() {
 
   const bot = new TelegramBot(token, { polling: true });
 
-  bot.onText(/\/start/, async (msg) => {
+  bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
     const chatId = msg.chat.id;
-    const telegramId = msg.from.id;
     const firstName = msg.from.first_name || 'there';
+    const referralCode = match && match[1] ? match[1].trim() : null;
 
-    // Save/refresh the chat id immediately on /start, for any user who
-    // already has an account. This means broadcasts can still reach them
-    // even if they never complete (or re-complete) the contact-share step
-    // below - e.g. after a phone change, or a user who created their
-    // account without going through /start originally.
-    try {
-      await query('UPDATE users SET telegram_chat_id = $1 WHERE telegram_id = $2', [chatId, telegramId]);
-    } catch (err) {
-      logger.error('[bot] Failed to save chat id on /start', { error: err.message, telegramId });
+    if (referralCode) {
+      pendingReferralCodes.set(chatId, referralCode);
     }
 
     bot.sendMessage(
       chatId,
-      `Welcome to Aviator, ${firstName}! ✈️\n\n` +
+      `Welcome to Buna Games, ${firstName}!\n\n` +
         `To get started, please share your phone number. We use this for withdrawals.`,
       {
         reply_markup: {
           keyboard: [
             [
               {
-                text: '📱 Share my phone number',
+                text: 'Share my phone number',
                 request_contact: true,
               },
             ],
@@ -86,32 +97,41 @@ function startBot() {
       const { rows } = await query('SELECT id FROM users WHERE telegram_id = $1', [telegramId]);
 
       if (rows.length > 0) {
-        await query(
-          'UPDATE users SET telegram_phone = $1, telegram_chat_id = $2 WHERE telegram_id = $3',
-          [normalizedPhone, chatId, telegramId]
-        );
+        await query('UPDATE users SET telegram_phone = $1 WHERE telegram_id = $2', [normalizedPhone, telegramId]);
       } else {
-        // No account yet - stage the phone number AND chat id keyed by
-        // telegram_id so auth.js can pick both up when they open the Mini
-        // App for the first time and their account gets created.
+        // No account yet - stage the phone number keyed by telegram_id so
+        // auth.js can pick it up when they open the Mini App for the
+        // first time and their account gets created.
         await query(
-          `INSERT INTO pending_telegram_phones (telegram_id, phone, chat_id) VALUES ($1, $2, $3)
-           ON CONFLICT (telegram_id) DO UPDATE SET phone = $2, chat_id = $3`,
-          [telegramId, normalizedPhone, chatId]
+          `INSERT INTO pending_telegram_phones (telegram_id, phone) VALUES ($1, $2)
+           ON CONFLICT (telegram_id) DO UPDATE SET phone = $2`,
+          [telegramId, normalizedPhone]
         );
       }
 
-      bot.sendMessage(chatId, 'Thanks! Your phone number has been saved. ✅', {
+      bot.sendMessage(chatId, 'Thanks! Your phone number has been saved.', {
         reply_markup: { remove_keyboard: true },
       });
+
+      // Carry the referral code (if any) through to the Mini App as a
+      // plain query parameter - see the comment at the top of this file
+      // for why this is necessary instead of relying on start_param.
+      const referralCode = pendingReferralCodes.get(chatId);
+      pendingReferralCodes.delete(chatId);
+
+      let launchUrl = miniAppUrl;
+      if (launchUrl && referralCode) {
+        const separator = launchUrl.includes('?') ? '&' : '?';
+        launchUrl = `${launchUrl}${separator}ref=${encodeURIComponent(referralCode)}`;
+      }
 
       bot.sendMessage(chatId, 'Tap below to start playing:', {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: '🎮 Play Aviator',
-                web_app: { url: miniAppUrl },
+                text: 'Play Buna Games',
+                web_app: { url: launchUrl },
               },
             ],
           ],
