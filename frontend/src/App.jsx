@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -49,11 +49,23 @@ function AuthProvider({ children }) {
 
 function ProtectedRoute({ children, adminOnly = false, withNav = true }) {
   const { user } = useAuth();
+  const location = useLocation();
 
-  if (!user) return <Navigate to="/login" replace />;
+  // Preserve the query string (e.g. ?ref=CODE from a referral link) across
+  // this redirect - otherwise Login.jsx never sees it and referral signups
+  // never get linked to a referrer.
+  if (!user) return <Navigate to={`/login${location.search}`} replace />;
   if (adminOnly && user.role !== 'admin') return <Navigate to="/dashboard" replace />;
 
   return withNav ? <Layout>{children}</Layout> : children;
+}
+
+// Redirects "/" to "/dashboard" while preserving any query string, so a
+// referral link opened at the site root (e.g. "/?ref=CODE") still has
+// ?ref=CODE attached once ProtectedRoute bounces the user on to /login.
+function RootRedirect() {
+  const location = useLocation();
+  return <Navigate to={`/dashboard${location.search}`} replace />;
 }
 
 export default function App() {
@@ -61,7 +73,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
 
           <Route
@@ -126,4 +138,4 @@ export default function App() {
       </BrowserRouter>
     </AuthProvider>
   );
-}
+            }
