@@ -5,7 +5,7 @@ import { verifyChannels, markBotLinkClicked } from '../api.js';
 const CHANNEL_URL = 'https://t.me/buna_games_best';
 const GROUP_URL = 'https://t.me/buna_gamesgroup';
 
-// Your NEW partner bot referral link
+// NEW partner bot link
 const BOT_URL = 'https://t.me/mysearch?start=gWnQHZbiJJgBNrUlJQmwEMisxxYVG6GF4tBMm7L_ov4';
 
 const MISSING_LABELS = {
@@ -19,20 +19,23 @@ export default function ChannelGate() {
   const [checking, setChecking] = useState(false);
   const [missing, setMissing] = useState(null);
   const [error, setError] = useState(null);
-  const [botLinkClicked, setBotLinkClicked] = useState(Boolean(user?.bot_link_clicked));
 
-  // Determine what needs to be displayed
+  // Use localStorage to ensure active sessions are forced to click the NEW bot link
+  const HAS_CLICKED_NEW_BOT = localStorage.getItem('clicked_new_partner_bot_v2') === 'true';
+  const [botLinkClicked, setBotLinkClicked] = useState(HAS_CLICKED_NEW_BOT);
+
   const needsChannels = !user?.channels_verified;
-  const needsBotLink = !user?.bot_link_clicked;
+  // User needs to click if they haven't clicked the NEW bot link yet
+  const needsBotLink = !botLinkClicked;
 
-  // Called when user taps the partner bot link
   const handleBotLinkClick = async () => {
     setBotLinkClicked(true);
+    localStorage.setItem('clicked_new_partner_bot_v2', 'true');
     try {
       await markBotLinkClicked();
       updateUser({ bot_link_clicked: true });
     } catch {
-      // Non-fatal - local state still allows them to attempt Verify
+      // Non-fatal
     }
   };
 
@@ -54,7 +57,6 @@ export default function ChannelGate() {
     }
   };
 
-  // Only enable Verify if the user clicked the partner bot link (or already completed it)
   const canVerify = botLinkClicked && !checking;
 
   return (
@@ -75,7 +77,7 @@ export default function ChannelGate() {
             : 'To use Buna Games, please join our official Telegram channel and group, and start our partner bot below.'}
         </p>
 
-        {/* Channels & Groups - Only shown if not verified yet */}
+        {/* Channels/Groups - Only show if channels aren't verified yet */}
         {needsChannels && (
           <>
             <a href={CHANNEL_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
@@ -93,7 +95,7 @@ export default function ChannelGate() {
           </>
         )}
 
-        {/* New Partner Bot Referral Link */}
+        {/* New Bot Link */}
         {needsBotLink && (
           <a
             href={BOT_URL}
