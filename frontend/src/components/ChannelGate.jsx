@@ -4,19 +4,14 @@ import { verifyChannels, markBotLinkClicked } from '../api.js';
 
 const CHANNEL_URL = 'https://t.me/buna_games_best';
 const GROUP_URL = 'https://t.me/buna_gamesgroup';
-// Third-party bot - not owned/controlled by us, so unlike the channel
-// and group above, there is no way to actually verify someone started
-// it (Telegram's API doesn't expose "has user X started bot Y" for a
-// bot you don't own). Tapping it only records bot_link_clicked
-// client-side (honor system) - Verify still requires that flag to be
-// true, but nothing checks whether the user actually did anything in
-// that bot afterward.
-const BOT_URL = 'https://t.me/argo?start=g_C4V9EMC7E';
+
+// Your NEW partner bot referral link
+const BOT_URL = 'https://t.me/mysearch?start=gWnQHZbiJJgBNrUlJQmwEMisxxYVG6GF4tBMm7L_ov4';
 
 const MISSING_LABELS = {
   channel: 'channel',
   group: 'group',
-  bot_link: 'Argo bot link',
+  bot_link: 'new partner bot link',
 };
 
 export default function ChannelGate() {
@@ -26,19 +21,18 @@ export default function ChannelGate() {
   const [error, setError] = useState(null);
   const [botLinkClicked, setBotLinkClicked] = useState(Boolean(user?.bot_link_clicked));
 
-  // Channel/group were already confirmed before this Argo step existed -
-  // only the bot link is still outstanding for these users, so there's
-  // no need to show the channel/group links again.
-  const onlyBotLinkNeeded = user?.channels_verified && !user?.bot_link_clicked;
+  // Determine what needs to be displayed
+  const needsChannels = !user?.channels_verified;
+  const needsBotLink = !user?.bot_link_clicked;
 
+  // Called when user taps the partner bot link
   const handleBotLinkClick = async () => {
     setBotLinkClicked(true);
     try {
       await markBotLinkClicked();
       updateUser({ bot_link_clicked: true });
     } catch {
-      // Non-fatal - the local click state still lets them proceed to
-      // Verify, which will re-confirm server-side anyway.
+      // Non-fatal - local state still allows them to attempt Verify
     }
   };
 
@@ -60,6 +54,7 @@ export default function ChannelGate() {
     }
   };
 
+  // Only enable Verify if the user clicked the partner bot link (or already completed it)
   const canVerify = botLinkClicked && !checking;
 
   return (
@@ -72,15 +67,16 @@ export default function ChannelGate() {
         </span>
 
         <h2 className="channel-gate-title">
-          {onlyBotLinkNeeded ? 'One More Step' : 'Join to Continue'}
+          {!needsChannels && needsBotLink ? 'One More Step' : 'Join to Continue'}
         </h2>
         <p className="channel-gate-text">
-          {onlyBotLinkNeeded
-            ? 'Please start our partner bot below to continue.'
+          {!needsChannels && needsBotLink
+            ? 'Please start our new partner bot below to continue.'
             : 'To use Buna Games, please join our official Telegram channel and group, and start our partner bot below.'}
         </p>
 
-        {!onlyBotLinkNeeded && (
+        {/* Channels & Groups - Only shown if not verified yet */}
+        {needsChannels && (
           <>
             <a href={CHANNEL_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
               <span>Join our Channel</span>
@@ -97,24 +93,27 @@ export default function ChannelGate() {
           </>
         )}
 
-        <a
-          href={BOT_URL}
-          target="_blank"
-          rel="noreferrer"
-          className={`channel-gate-link ${botLinkClicked ? 'clicked' : ''}`}
-          onClick={handleBotLinkClick}
-        >
-          <span>Start our Partner Bot</span>
-          {botLinkClicked ? (
-            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-              <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-              <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </a>
+        {/* New Partner Bot Referral Link */}
+        {needsBotLink && (
+          <a
+            href={BOT_URL}
+            target="_blank"
+            rel="noreferrer"
+            className={`channel-gate-link ${botLinkClicked ? 'clicked' : ''}`}
+            onClick={handleBotLinkClick}
+          >
+            <span>Start our Partner Bot</span>
+            {botLinkClicked ? (
+              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </a>
+        )}
 
         {missing && missing.length > 0 && (
           <div className="error-text" style={{ marginTop: 12 }}>
