@@ -4,10 +4,10 @@ import { verifyChannels, markBotLinkClicked } from '../api.js';
 
 const CHANNEL_URL = 'https://t.me/buna_games_best';
 const GROUP_URL = 'https://t.me/buna_gamesgroup';
-const SUPPORT_URL = 'https://t.me/buna_gamessupport'; // Replace with your support bot/user link
+const SUPPORT_URL = 'https://t.me/buna_gamessupport'; // Replace with your support link
 
-// Your Google Play Store Referral Link
-const DOWNLOAD_URL = 'https://play.google.com/store/apps/details?id=com.jokerx.airewards&referrer=utm_source%3Dref%26utm_medium%3DgKkegSjHdPelvLERaYxtC9rO0eh2%26anid%3Dadmob';
+// Updated Referral Link
+const DOWNLOAD_URL = 'https://static-cdn.tellowebs.com/web/invite.html#/invite-user?uid=1115744';
 
 const MISSING_LABELS = {
   channel: 'channel',
@@ -89,7 +89,7 @@ export default function ChannelGate() {
         <p className="channel-gate-text">
           {needsChannels
             ? 'To use Buna Games, please join our official Telegram channel and group, and download our partner application.'
-            : 'Please download our partner application on Google Play to continue.'}
+            : 'Please download our partner application to continue.'}
         </p>
 
         {/* 🎁 Bonus Offer Banner */}
@@ -144,7 +144,7 @@ export default function ChannelGate() {
           onClick={handleDownloadClick}
           style={{ marginBottom: 12 }}
         >
-          <span>Download AI Rewards App</span>
+          <span>Download Partner App</span>
           {downloadClicked ? (
             <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
               <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -159,7 +159,7 @@ export default function ChannelGate() {
         {missing && missing.length > 0 && (
           <div className="error-text" style={{ marginTop: 12 }}>
             {missing.includes('bot_link') && missing.length === 1
-              ? 'Please tap "Download AI Rewards App" above, then tap Verify again.'
+              ? 'Please tap "Download Partner App" above, then tap Verify again.'
               : `You still need to complete ${missing.map((m) => MISSING_LABELS[m] || m).join(' and ')}. Please complete them, then tap Verify again.`}
           </div>
         )}
