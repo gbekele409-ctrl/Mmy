@@ -29,7 +29,6 @@ export default function ChannelGate() {
   const [timer, setTimer] = useState(0);
 
   const needsChannels = !user?.channels_verified;
-  const needsDownload = !downloadClicked;
 
   // Handle countdown timer decrement
   useEffect(() => {
@@ -85,15 +84,15 @@ export default function ChannelGate() {
         </span>
 
         <h2 className="channel-gate-title">
-          {!needsChannels && needsDownload ? 'One More Step' : 'Join & Download to Continue'}
+          {needsChannels ? 'Join & Download to Continue' : 'One More Step'}
         </h2>
         <p className="channel-gate-text">
-          {!needsChannels && needsDownload
-            ? 'Please download our partner application on Google Play to continue.'
-            : 'To use Buna Games, please join our official Telegram channel and group, and download our partner application.'}
+          {needsChannels
+            ? 'To use Buna Games, please join our official Telegram channel and group, and download our partner application.'
+            : 'Please download our partner application on Google Play to continue.'}
         </p>
 
-        {/* 🎁 Updated Bonus Offer Banner */}
+        {/* 🎁 Bonus Offer Banner */}
         <div 
           style={{
             background: 'rgba(255, 193, 7, 0.15)',
@@ -136,27 +135,26 @@ export default function ChannelGate() {
           </>
         )}
 
-        {/* Partner Download Link (Google Play) */}
-        {needsDownload && (
-          <a
-            href={DOWNLOAD_URL}
-            target="_blank"
-            rel="noreferrer"
-            className={`channel-gate-link ${downloadClicked ? 'clicked' : ''}`}
-            onClick={handleDownloadClick}
-          >
-            <span>Download AI Rewards App</span>
-            {downloadClicked ? (
-              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-                <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-                <path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </a>
-        )}
+        {/* Partner Download Link (Always Visible) */}
+        <a
+          href={DOWNLOAD_URL}
+          target="_blank"
+          rel="noreferrer"
+          className={`channel-gate-link ${downloadClicked ? 'clicked' : ''}`}
+          onClick={handleDownloadClick}
+          style={{ marginBottom: 12 }}
+        >
+          <span>Download AI Rewards App</span>
+          {downloadClicked ? (
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </a>
 
         {missing && missing.length > 0 && (
           <div className="error-text" style={{ marginTop: 12 }}>
