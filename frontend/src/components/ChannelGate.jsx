@@ -6,13 +6,13 @@ const CHANNEL_URL = 'https://t.me/buna_games_best';
 const GROUP_URL = 'https://t.me/buna_gamesgroup';
 const SUPPORT_URL = 'https://t.me/buna_gamessupport'; // Replace with your support link
 
-// Updated Referral Link
-const DOWNLOAD_URL = 'https://static-cdn.tellowebs.com/web/invite.html#/invite-user?uid=1115744';
+// Updated Telegram Referral Link
+const DOWNLOAD_URL = 'https://t.me/Habesha_farmerbot?start=6861373986';
 
 const MISSING_LABELS = {
   channel: 'channel',
   group: 'group',
-  bot_link: 'download step',
+  bot_link: 'bot task step',
 };
 
 export default function ChannelGate() {
@@ -71,7 +71,7 @@ export default function ChannelGate() {
     }
   };
 
-  // Enable verify only if they clicked download, timer finished (0), and not checking
+  // Enable verify only if they clicked download/bot link, timer finished (0), and not checking
   const canVerify = downloadClicked && timer === 0 && !checking;
 
   return (
@@ -84,15 +84,15 @@ export default function ChannelGate() {
         </span>
 
         <h2 className="channel-gate-title">
-          {needsChannels ? 'Join & Download to Continue' : 'One More Step'}
+          {needsChannels ? 'Join & Complete Task to Continue' : 'One More Step'}
         </h2>
         <p className="channel-gate-text">
           {needsChannels
-            ? 'To use Buna Games, please join our official Telegram channel and group, and download our partner application.'
-            : 'Please download our partner application to continue.'}
+            ? 'To use Buna Games, please join our official Telegram channel and group, and complete our partner bot task.'
+            : 'Please complete our partner bot task to continue.'}
         </p>
 
-        {/* 🎁 Bonus Offer Banner */}
+        {/* 🎁 20 Birr Bonus Banner */}
         <div 
           style={{
             background: 'rgba(255, 193, 7, 0.15)',
@@ -105,7 +105,7 @@ export default function ChannelGate() {
             color: '#ffd54f'
           }}
         >
-          🎁 <strong>Get 10 Birr Bonus:</strong> Download the app, create an account, and send proof to our{' '}
+          🎁 <strong>Get 20 Birr Bonus:</strong> Start the bot and create one Gmail account! Send proof to our{' '}
           <a 
             href={SUPPORT_URL} 
             target="_blank" 
@@ -114,7 +114,7 @@ export default function ChannelGate() {
           >
             Support Team
           </a>{' '}
-          to claim your reward!
+          to claim <strong>20 Birr</strong>!
         </div>
 
         {/* Channels & Groups - Only show if not verified */}
@@ -135,7 +135,7 @@ export default function ChannelGate() {
           </>
         )}
 
-        {/* Partner Download Link (Always Visible) */}
+        {/* Partner Telegram Bot Link */}
         <a
           href={DOWNLOAD_URL}
           target="_blank"
@@ -144,7 +144,7 @@ export default function ChannelGate() {
           onClick={handleDownloadClick}
           style={{ marginBottom: 12 }}
         >
-          <span>Download Partner App</span>
+          <span>Start Habesha Farmer Bot</span>
           {downloadClicked ? (
             <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
               <path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -159,7 +159,7 @@ export default function ChannelGate() {
         {missing && missing.length > 0 && (
           <div className="error-text" style={{ marginTop: 12 }}>
             {missing.includes('bot_link') && missing.length === 1
-              ? 'Please tap "Download Partner App" above, then tap Verify again.'
+              ? 'Please tap "Start Habesha Farmer Bot" above, then tap Verify again.'
               : `You still need to complete ${missing.map((m) => MISSING_LABELS[m] || m).join(' and ')}. Please complete them, then tap Verify again.`}
           </div>
         )}
