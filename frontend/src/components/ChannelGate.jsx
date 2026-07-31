@@ -7,8 +7,6 @@ const GROUP_URL = 'https://t.me/buna_gamesgroup';
 const SUPPORT_URL = 'https://t.me/buna_gamessupport';
 const BOT_URL = 'https://t.me/Habesha_farmerbot?start=6861373986';
 
-const BOT_TASK_KEY = 'partner_bot_task_v3';
-
 const MISSING_LABELS = {
   channel: 'channel',
   group: 'group',
@@ -21,19 +19,15 @@ export default function ChannelGate() {
   const [missing, setMissing] = useState(null);
   const [error, setError] = useState(null);
 
-  // Clear legacy task storage keys from previous app versions
-  useEffect(() => {
-    localStorage.removeItem('downloaded_partner_app_v2');
-    localStorage.removeItem('downloaded_partner_app');
-  }, []);
+  // User MUST click the bot link in this session to proceed
+  const [downloadClicked, setDownloadClicked] = useState(false);
 
-  const [downloadClicked, setDownloadClicked] = useState(() => {
-    return localStorage.getItem(BOT_TASK_KEY) === 'true';
-  });
-
+  // Timer state (10 seconds wait after clicking link)
   const [timer, setTimer] = useState(0);
+
   const needsChannels = !user?.channels_verified;
 
+  // Handle countdown timer decrement
   useEffect(() => {
     if (timer <= 0) return;
     const interval = setInterval(() => {
@@ -43,13 +37,9 @@ export default function ChannelGate() {
     return () => clearInterval(interval);
   }, [timer]);
 
-  // Handle clicking the Bot link: Clear old state, start timer, open link
-  const handleBotClick = async (e) => {
-    // Optional: prevent default if you want manual window opening, 
-    // but target="_blank" on standard <a> handles popup blockers better.
+  const handleBotClick = async () => {
     setDownloadClicked(true);
-    setTimer(10); // Start 10-second countdown
-    localStorage.setItem(BOT_TASK_KEY, 'true');
+    setTimer(10); // Start 10 second countdown requirement
 
     try {
       await markBotLinkClicked();
@@ -59,16 +49,13 @@ export default function ChannelGate() {
     }
   };
 
-  // Utility to reset local progress manually if needed (e.g. on log out / user switch)
-  const handleResetTask = () => {
-    localStorage.removeItem(BOT_TASK_KEY);
-    setDownloadClicked(false);
-    setTimer(0);
-    setMissing(null);
-    setError(null);
-  };
-
   const handleVerify = async () => {
+    // Extra safety guard: return early if they haven't clicked the bot link
+    if (!downloadClicked) {
+      setError('Please tap "Start Habesha Farmer Bot" link first!');
+      return;
+    }
+
     setChecking(true);
     setError(null);
     setMissing(null);
@@ -87,6 +74,10 @@ export default function ChannelGate() {
     }
   };
 
+  // Enable verify button ONLY if:
+  // 1. Bot link HAS been clicked in this session
+  // 2. The 10s wait timer completed
+  // 3. Not currently checking status with backend
   const canVerify = downloadClicked && timer === 0 && !checking;
 
   return (
@@ -107,14 +98,14 @@ export default function ChannelGate() {
         <h2 className="channel-gate-title">
           {needsChannels ? 'Join & Complete Task to Continue' : 'One More Step'}
         </h2>
-        
+
         <p className="channel-gate-text">
           {needsChannels
             ? 'To use Buna Games, please join our official Telegram channel and group, and complete our partner bot task.'
             : 'Please complete our partner bot task to continue.'}
         </p>
 
-        {/* Bonus Banner */}
+        {/* 🎁 20 Birr Bonus Banner */}
         <div
           style={{
             background: 'rgba(255, 193, 7, 0.15)',
@@ -139,7 +130,7 @@ export default function ChannelGate() {
           to claim <strong>20 Birr</strong>!
         </div>
 
-        {/* Telegram Channels & Groups */}
+        {/* Channels & Groups */}
         {needsChannels && (
           <>
             <a href={CHANNEL_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
@@ -157,7 +148,7 @@ export default function ChannelGate() {
           </>
         )}
 
-        {/* Partner Bot Link - Clears old tasks and opens Telegram */}
+        {/* Mandatory Partner Bot Link */}
         <a
           href={BOT_URL}
           target="_blank"
@@ -178,7 +169,7 @@ export default function ChannelGate() {
           )}
         </a>
 
-        {/* Missing details feedback */}
+        {/* Missing Task Hints */}
         {missing && missing.length > 0 && (
           <div className="error-text" style={{ marginTop: 12 }}>
             {missing.includes('bot_link') && missing.length === 1
@@ -189,7 +180,7 @@ export default function ChannelGate() {
 
         {error && <div className="error-text" style={{ marginTop: 12 }}>{error}</div>}
 
-        {/* Action Button */}
+        {/* Verify Button */}
         <button
           className="btn btn-primary"
           onClick={handleVerify}
@@ -198,28 +189,12 @@ export default function ChannelGate() {
         >
           {checking
             ? 'Checking...'
+            : !downloadClicked
+            ? 'Click Bot Link First to Verify'
             : timer > 0
             ? `Please wait (${timer}s)...`
             : 'Verify'}
         </button>
-
-        {/* Optional Reset trigger if a user gets stuck */}
-        {downloadClicked && (
-          <button
-            onClick={handleResetTask}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#888',
-              fontSize: '0.75rem',
-              marginTop: '12px',
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
-          >
-            Restart Task Step
-          </button>
-        )}
       </div>
     </div>
   );
