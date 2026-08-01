@@ -14,28 +14,24 @@ const MISSING_LABELS = {
 };
 
 export default function ChannelGate() {
-  const { user, updateUser } = useAuth();
+  const { updateUser } = useAuth();
   const [checking, setChecking] = useState(false);
   const [missing, setMissing] = useState(null);
   const [error, setError] = useState(null);
 
-  // FORCE: Always defaults to false when the component mounts.
-  // The user MUST click the link on every visit.
+  // RESTART FOR ALL USERS:
+  // Starts as FALSE for EVERY user on mount, regardless of their past progress.
   const [downloadClicked, setDownloadClicked] = useState(false);
-
-  // Timer state (10 seconds wait after clicking link)
   const [timer, setTimer] = useState(0);
 
-  const needsChannels = !user?.channels_verified;
-
-  // Clear any old stored flags in localStorage so users aren't auto-passed
+  // Clear all old persistent local storage on component mount
   useEffect(() => {
     localStorage.removeItem('downloaded_partner_app');
     localStorage.removeItem('downloaded_partner_app_v2');
     localStorage.removeItem('partner_bot_task_v3');
   }, []);
 
-  // Timer countdown
+  // 10-Second Timer Countdown
   useEffect(() => {
     if (timer <= 0) return;
     const interval = setInterval(() => {
@@ -45,24 +41,24 @@ export default function ChannelGate() {
     return () => clearInterval(interval);
   }, [timer]);
 
-  // Triggered when user clicks the Bot link
+  // Click handler for the bot link
   const handleBotClick = async () => {
     setDownloadClicked(true);
-    setTimer(10); // Start 10-second wait requirement
-    setError(null); // Clear previous errors
+    setTimer(10); // Starts 10s wait timer
+    setError(null);
 
     try {
       await markBotLinkClicked();
       updateUser({ bot_link_clicked: true });
     } catch {
-      // API call failed, but user state still registers link click
+      // Non-fatal API backup
     }
   };
 
   const handleVerify = async () => {
-    // HARD GUARD: Block verification if link was not clicked in this session
+    // HARD BLOCK: User must have clicked the bot link in this current view session
     if (!downloadClicked) {
-      setError('You MUST click the "Start Habesha Farmer Bot" link first!');
+      setError('You must tap the "Start Habesha Farmer Bot" link above first!');
       return;
     }
 
@@ -84,7 +80,7 @@ export default function ChannelGate() {
     }
   };
 
-  // Button is STRICTLY enabled only after the link is clicked & timer ends
+  // Button is strictly disabled until bot link is tapped AND timer reaches 0
   const canVerify = downloadClicked && timer === 0 && !checking;
 
   return (
@@ -102,14 +98,10 @@ export default function ChannelGate() {
           </svg>
         </span>
 
-        <h2 className="channel-gate-title">
-          {needsChannels ? 'Join & Complete Task to Continue' : 'One More Step'}
-        </h2>
+        <h2 className="channel-gate-title">Complete Bot Task to Continue</h2>
 
         <p className="channel-gate-text">
-          {needsChannels
-            ? 'To use Buna Games, please join our official Telegram channel and group, and complete our partner bot task.'
-            : 'Please complete our partner bot task to continue.'}
+          Please complete our partner bot task to continue using Buna Games.
         </p>
 
         {/* 🎁 20 Birr Bonus Banner */}
@@ -137,25 +129,21 @@ export default function ChannelGate() {
           to claim <strong>20 Birr</strong>!
         </div>
 
-        {/* Channels & Groups */}
-        {needsChannels && (
-          <>
-            <a href={CHANNEL_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
-              <span>Join our Channel</span>
-              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-                <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
-            <a href={GROUP_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
-              <span>Join our Group</span>
-              <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-                <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
-          </>
-        )}
+        {/* Channels & Groups Links */}
+        <a href={CHANNEL_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
+          <span>Join our Channel</span>
+          <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </a>
+        <a href={GROUP_URL} target="_blank" rel="noreferrer" className="channel-gate-link">
+          <span>Join our Group</span>
+          <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </a>
 
-        {/* Mandatory Partner Bot Link */}
+        {/* MANDATORY BOT LINK */}
         <a
           href={BOT_URL}
           target="_blank"
@@ -164,7 +152,7 @@ export default function ChannelGate() {
           onClick={handleBotClick}
           style={{
             marginBottom: 12,
-            border: downloadClicked ? '1px solid #4caf50' : '1px solid #ff9800', // Visual cue to user
+            border: downloadClicked ? '1px solid #4caf50' : '1px solid #ff9800',
           }}
         >
           <span>Start Habesha Farmer Bot</span>
@@ -179,7 +167,7 @@ export default function ChannelGate() {
           )}
         </a>
 
-        {/* Error / Warning Notice */}
+        {/* Missing / Error feedback */}
         {missing && missing.length > 0 && (
           <div className="error-text" style={{ marginTop: 12, color: '#f44336' }}>
             {missing.includes('bot_link') && missing.length === 1
@@ -190,7 +178,7 @@ export default function ChannelGate() {
 
         {error && <div className="error-text" style={{ marginTop: 12, color: '#f44336' }}>{error}</div>}
 
-        {/* Strictly Disabled Button until link clicked */}
+        {/* Verify Action Button */}
         <button
           className="btn btn-primary"
           onClick={handleVerify}
@@ -205,7 +193,7 @@ export default function ChannelGate() {
           {checking
             ? 'Checking...'
             : !downloadClicked
-            ? '🔒 Click Bot Link First to Unlock Verify'
+            ? '🔒 Tap Bot Link First to Unlock Verify'
             : timer > 0
             ? `Please wait (${timer}s)...`
             : 'Verify'}
@@ -213,4 +201,4 @@ export default function ChannelGate() {
       </div>
     </div>
   );
-}
+          }
