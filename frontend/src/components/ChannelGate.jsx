@@ -19,7 +19,8 @@ export default function ChannelGate() {
   const [missing, setMissing] = useState(null);
   const [error, setError] = useState(null);
 
-  // User MUST click the bot link in this session to proceed
+  // FORCE: Always defaults to false when the component mounts.
+  // The user MUST click the link on every visit.
   const [downloadClicked, setDownloadClicked] = useState(false);
 
   // Timer state (10 seconds wait after clicking link)
@@ -27,7 +28,14 @@ export default function ChannelGate() {
 
   const needsChannels = !user?.channels_verified;
 
-  // Handle countdown timer decrement
+  // Clear any old stored flags in localStorage so users aren't auto-passed
+  useEffect(() => {
+    localStorage.removeItem('downloaded_partner_app');
+    localStorage.removeItem('downloaded_partner_app_v2');
+    localStorage.removeItem('partner_bot_task_v3');
+  }, []);
+
+  // Timer countdown
   useEffect(() => {
     if (timer <= 0) return;
     const interval = setInterval(() => {
@@ -37,22 +45,24 @@ export default function ChannelGate() {
     return () => clearInterval(interval);
   }, [timer]);
 
+  // Triggered when user clicks the Bot link
   const handleBotClick = async () => {
     setDownloadClicked(true);
-    setTimer(10); // Start 10 second countdown requirement
+    setTimer(10); // Start 10-second wait requirement
+    setError(null); // Clear previous errors
 
     try {
       await markBotLinkClicked();
       updateUser({ bot_link_clicked: true });
     } catch {
-      // Non-fatal API backup
+      // API call failed, but user state still registers link click
     }
   };
 
   const handleVerify = async () => {
-    // Extra safety guard: return early if they haven't clicked the bot link
+    // HARD GUARD: Block verification if link was not clicked in this session
     if (!downloadClicked) {
-      setError('Please tap "Start Habesha Farmer Bot" link first!');
+      setError('You MUST click the "Start Habesha Farmer Bot" link first!');
       return;
     }
 
@@ -74,10 +84,7 @@ export default function ChannelGate() {
     }
   };
 
-  // Enable verify button ONLY if:
-  // 1. Bot link HAS been clicked in this session
-  // 2. The 10s wait timer completed
-  // 3. Not currently checking status with backend
+  // Button is STRICTLY enabled only after the link is clicked & timer ends
   const canVerify = downloadClicked && timer === 0 && !checking;
 
   return (
@@ -155,7 +162,10 @@ export default function ChannelGate() {
           rel="noreferrer"
           className={`channel-gate-link ${downloadClicked ? 'clicked' : ''}`}
           onClick={handleBotClick}
-          style={{ marginBottom: 12 }}
+          style={{
+            marginBottom: 12,
+            border: downloadClicked ? '1px solid #4caf50' : '1px solid #ff9800', // Visual cue to user
+          }}
         >
           <span>Start Habesha Farmer Bot</span>
           {downloadClicked ? (
@@ -169,28 +179,33 @@ export default function ChannelGate() {
           )}
         </a>
 
-        {/* Missing Task Hints */}
+        {/* Error / Warning Notice */}
         {missing && missing.length > 0 && (
-          <div className="error-text" style={{ marginTop: 12 }}>
+          <div className="error-text" style={{ marginTop: 12, color: '#f44336' }}>
             {missing.includes('bot_link') && missing.length === 1
               ? 'Please tap "Start Habesha Farmer Bot" above, then tap Verify again.'
               : `You still need to complete ${missing.map((m) => MISSING_LABELS[m] || m).join(' and ')}. Please complete them, then tap Verify again.`}
           </div>
         )}
 
-        {error && <div className="error-text" style={{ marginTop: 12 }}>{error}</div>}
+        {error && <div className="error-text" style={{ marginTop: 12, color: '#f44336' }}>{error}</div>}
 
-        {/* Verify Button */}
+        {/* Strictly Disabled Button until link clicked */}
         <button
           className="btn btn-primary"
           onClick={handleVerify}
           disabled={!canVerify}
-          style={{ width: '100%', marginTop: 16 }}
+          style={{
+            width: '100%',
+            marginTop: 16,
+            opacity: canVerify ? 1 : 0.6,
+            cursor: canVerify ? 'pointer' : 'not-allowed',
+          }}
         >
           {checking
             ? 'Checking...'
             : !downloadClicked
-            ? 'Click Bot Link First to Verify'
+            ? '🔒 Click Bot Link First to Unlock Verify'
             : timer > 0
             ? `Please wait (${timer}s)...`
             : 'Verify'}
